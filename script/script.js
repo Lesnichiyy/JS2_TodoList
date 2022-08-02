@@ -3,73 +3,77 @@ const btnAdd = document.querySelector('#btnAdd');
 const list = document.querySelector('#list');
 const complited = document.querySelector('#complited');
 
-const templ = document.querySelector('#templ');
+
 
 let todoArr = [];
 
 function addArr () {
-    const text = inpText.value;
-    if(!text.trim()) return;
 
-    let todoArrItem = {                                  
-        text,
-        status: 'uncomplited'
-    }
-    todoArr.push(todoArrItem);
+  const text = inpText.value;
 
-    todoArr.forEach((item, index) => {todoArrItem.id = `li-${index}`});  // присваиваю ID объекту без сторонней библиотеки
-    
-    inpText.value = '';
-    inpText.focus();    
-    render();
+  if(!text.trim()) return;
+
+  const obj = {
+    text,
+    status: 'inProcess'
+  }
+  obj.text = text;
+  todoArr.push(obj);
+
+  todoArr.forEach((item, index)=>{
+    item.id = `ul-${index}`
+  })
+
+  inpText.value = '';
+  inpText.focus();
+  render();
 }
 
-function render() {
-    list.innerHTML  = '';
-    complited.innerHTML  = '';
-      
-    /* const ul = document.createElement('ul'); */
+function render(){
 
-    const ul = templ.content.cloneNode(true);       
+    list.innerHTML = '';
+    complited.innerHTML = '';
 
-    todoArr.forEach((ev) => {
-        /* const newLi = document.createElement('li');        
-        newLi.innerHTML = ev.text;
-        newLi.setAttribute('id', ev.id);           
+    const ulInProcess = document.createElement('ul');
+    const ulDone = document.createElement('ul');
+
+    todoArr.forEach((item) =>{
+        const liId = item.id;      
+
+        const li = document.createElement('li');
+        const textNode = document.createTextNode(item.text);
         const a = document.createElement('a');
         a.href = '#';
-        a.innerHTML = 'Удалить';
-        newLi.appendChild(a);        
-        ul.appendChild(newLi); */
+        a.textContent = 'Удалить';
         
-        const newLi = ul.querySelector('li');
-        const a = newLi.querySelector('a')
-        newLi.firstChild.textContent = ev.text;
-        newLi.setAttribute('id', ev.id);        
-               
+        li.setAttribute('id', liId);
+        li.appendChild(textNode);
+        li.appendChild(a);
+        
 
-        newLi.addEventListener('click', function(ev){
-            if(ev.target.nodeName != 'LI') return;
-            let id = newLi.getAttribute('id');
-            todoArr.forEach(item =>{
-                if(item.id == id){                    
-                   item.status = item.status == 'complited' ? 'uncomplited' : 'complited';                                      
-                }
-                render();
-            })
-        });
-        
+        li.addEventListener('click', function(ev){
+           if(ev.target.nodeName !== 'LI') return;
+           const id = this.getAttribute('id') 
+           todoArr.forEach(item => {
+            if(item.id == id){
+            item.status = item.status == 'Done' ? 'InProcess' : 'Done';
+            }            
+            });
+            render();           
+        })        
+
         a.addEventListener('click', function(ev){
             ev.preventDefault();
-            let id = this.parentNode.getAttribute('id');           
-            todoArr = todoArr.filter(item => item.id != id);
-            render();                       
+            const id = this.parentNode.getAttribute('id')                       
+            todoArr = todoArr.filter(item => item.id !== id);            
+            render();
         })
-             
-    })
-    todoArr.forEach(item =>{
-        item.status == 'uncomplited' ? list.appendChild(ul) : complited.appendChild(ul);
-    })   
+
+        item.status == 'Done' ? ulDone.appendChild(li) : ulInProcess.appendChild(li); 
+    });
+
+    list.appendChild(ulInProcess);
+    complited.appendChild(ulDone);
 }
 
 btnAdd.addEventListener('click', addArr);
